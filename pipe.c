@@ -33,6 +33,7 @@ int main(int argc, char **argv)
 
 	       	close(pipe_fds[0]);					// 마지막으로 읽기 전용인 fd[0]을 닫아준다.
 									// 혹시 몰라서 close()를 주석 처리하고 돌려봤는데 주석 처리를 해도 잘 돌아갑니다. 잘 돌아간다면 왜 굳이 close()를 해주는건지 이유가     									 궁금합니다.
+		                                                        //→ ***파이프는 파일시스템의 또 다른 파생형태입니다 파일을 open한 뒤 close하는 이유를 찾아보세요***
 	} else if (pid > 0) {
 		/* parent process */
 		close(pipe_fds[0]);
