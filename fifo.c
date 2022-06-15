@@ -20,15 +20,34 @@ static int do_reader(void)						// do_reader()함수 정의부분
 {
     int fd;								// fd를 지정해주기 위해 변수선언
     char buf[128];							// 문자열을 읽어들이기 위해 do_writer에 선언된 buf와 같은 크기의 배열 선언
-	
-	printf("call open()\n");					// call open 문자열 출력
-        fd = open(FIFO_FILENAME, O_RDONLY);				// fd 를 open하는데 이때 읽기 전용으로 Open한다.
+    int i=0;
+
+	printf("call open!!!!!!!!!()\n");					// call open 문자열 출력
+         
+	fd = open(FIFO_FILENAME, O_RDONLY);				// fd 를 open하는데 이때 읽기 전용으로 Open한다.
         if (fd < 0) {							// 만약 fd가 0보다 작으면 즉 제대로 생성되지 않고 실패했을 경우 에러 메시지를 출력하고 프로그램을 종료시킨다.
             perror("reader_side_open()");				// writer side에도 에러가 났을 때 open()으로 똑같은 메시지를 출력하기 때문에 임의로 reader_side를 붙여 어느쪽 에러인지 명확하게 함
             return -1;
         }
-        read(fd, buf, sizeof(buf));					// fd를 이용하여 buf에 저장되어있는 문자열을 buf의 크기만큼 읽어낸다.
-        printf("writer said...%s\n", buf);				// 읽어온 buf를 printf()함수를 이용하여 출력한다.
+        
+
+	while(read(fd, buf, sizeof(buf))!=0){
+		printf("%s\n", buf);	
+		memset(buf,0,sizeof(buf));	
+
+
+	}
+
+
+
+
+
+
+	/*for(i=0;i<3;i++){ 
+		memset(buf,0,sizeof(buf));	
+		read(fd, buf, sizeof(buf));					// fd를 이용하여 buf에 저장되어있는 문자열을 buf의 크기만큼 읽어낸다.
+        	printf("writer said...%s\n", buf);				// 읽어온 buf를 printf()함수를 이용하여 출력한다.
+	}	*/
 	close(fd); 							// 작업이 끝난 fd는 자원관리를 위하여 닫아준다.
 return 0;
 }
@@ -37,7 +56,8 @@ static int do_writer(void)
 {
    int fd; 								// fd를 설정할 int형 데이터변수
    char buf[128];							// 문자열 입력을 위한 buf라는 이름의 문자형 배열 변수
-
+   int i; 
+   int result; 
      printf("make fifo\n");
      unlink(FIFO_FILENAME); 						// 파이프 이름의 프로그램이 만들어져있을 수도있기 때문에 제거를 해준다.
      if (mkfifo(FIFO_FILENAME, 0644)) {					// FIFO_FILENAME에 정의되어있는 경로에 0644의 권한을 가지는 파이프를 생성한다.
@@ -51,9 +71,19 @@ static int do_writer(void)
 	    perror("writer_side_open()");				// reader side에도 에러가 났을 때 open()으로 똑같은 메시지를 출력하기 때문에 임의로 writer_side를 붙여 어느쪽 에러인지 명확하게 함
 	    return -1;
 	}
-	strncpy(buf, "hello", sizeof(buf));				// buf에 hello라는 문자열을 buf의 사이즈만큼 복사한다.
-	write(fd, buf, strlen(buf));					// fd에 buf에 저장되어있는 문자열을 write한다.
-        close(fd);
+	//strncpy(buf, "hello", sizeof(buf));				// buf에 hello라는 문자열을 buf의 사이즈만큼 복사한다.
+	for(i=0; i<10; i++){
+		memset(buf,0,sizeof(buf));	
+		printf("보낼 문자를 입력하세요:");
+		fgets(buf,128,stdin);	
+		write(fd, buf, strlen(buf));					// fd에 buf에 저장되어있는 문자열을 write한다.
+		if(strcmp(buf,"stop")==10){
+			exit(0);
+		}
+			
+			
+	} 
+	close(fd);
 	return 0;
 }
 
