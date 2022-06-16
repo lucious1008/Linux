@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
+#include <stdbool.h>							// boolean 타입의 true를 사용하기 위해 stdbool.h을 인클루드함.
 
 #define FIFO_FILENAME  		"./testfifo"				// fifo파일이 생성될 경로를 지정하는 부분
 
@@ -20,7 +20,7 @@ static int do_reader(void)						// do_reader()함수 정의부분
 {
     int fd;								// fd를 지정해주기 위해 변수선언
     char buf[128];							// 문자열을 읽어들이기 위해 do_writer에 선언된 buf와 같은 크기의 배열 선언
-    int i=0;
+    int i=0;								// 반복문 사용을 위한 int타입의 i변수 선언
 
 	printf("call open!!!!!!!!!()\n");					// call open 문자열 출력
          
@@ -31,9 +31,9 @@ static int do_reader(void)						// do_reader()함수 정의부분
         }
         
 
-	while(read(fd, buf, sizeof(buf))!=0){
-		printf("%s\n", buf);	
-		memset(buf,0,sizeof(buf));	
+	while(read(fd, buf, sizeof(buf))!=0){				// while문을 사용하여 fd에 아무것도 남아있지 않을때까지 반복해서 실행한다.
+		printf("%s\n", buf);					// printf()함수를 이용하여 buf안에 있는 문자열을 출력한다.
+		memset(buf,0,sizeof(buf));				// 혹시나 남아있을 수 있는 쓰레기값들을 초기화시켜주기 위해 memset()함수 사용
 
 
 	}
@@ -43,7 +43,7 @@ static int do_reader(void)						// do_reader()함수 정의부분
 
 
 
-	/*for(i=0;i<3;i++){ 
+	/*for(i=0;i<3;i++){ 						// while문 사용하기 이전 for문을 이용하여 3번만 반복실행해보는 코드 작성. while문으로 대체되었기 때문에 주석표시하였음.
 		memset(buf,0,sizeof(buf));	
 		read(fd, buf, sizeof(buf));					// fd를 이용하여 buf에 저장되어있는 문자열을 buf의 크기만큼 읽어낸다.
         	printf("writer said...%s\n", buf);				// 읽어온 buf를 printf()함수를 이용하여 출력한다.
@@ -56,8 +56,8 @@ static int do_writer(void)
 {
    int fd; 								// fd를 설정할 int형 데이터변수
    char buf[128];							// 문자열 입력을 위한 buf라는 이름의 문자형 배열 변수
-   int i; 
-   int result; 
+   int i; 								// 반복문에 사용할 변수 i선언
+   int result; 								// strcmp함수의 결과값을 알기 위해 선언했던 변수
      printf("make fifo\n");
      unlink(FIFO_FILENAME); 						// 파이프 이름의 프로그램이 만들어져있을 수도있기 때문에 제거를 해준다.
      if (mkfifo(FIFO_FILENAME, 0644)) {					// FIFO_FILENAME에 정의되어있는 경로에 0644의 권한을 가지는 파이프를 생성한다.
@@ -72,18 +72,19 @@ static int do_writer(void)
 	    return -1;
 	}
 	//strncpy(buf, "hello", sizeof(buf));				// buf에 hello라는 문자열을 buf의 사이즈만큼 복사한다.
-	for(i=0; i<10; i++){
-		memset(buf,0,sizeof(buf));	
-		printf("보낼 문자를 입력하세요:");
-		fgets(buf,128,stdin);	
+	while(true){							// while문을 실행하여 무한 루프 반복문을 만듦
+		memset(buf,0,sizeof(buf));				// memset()함수를 이용하여 buf를 초기화
+		printf("stop을 입력하면 프로그램이 종료됩니다.");	
+		printf("보낼 문자를 입력하세요:");			// 보내고 싶은 문자가 무엇인지 물어보는 출력문 출력
+		fgets(buf,128,stdin);					// fgets()함수 실행으로 buf에 문자열을 입력받는다.
 		write(fd, buf, strlen(buf));					// fd에 buf에 저장되어있는 문자열을 write한다.
-		if(strcmp(buf,"stop")==10){
-			exit(0);
+		if(strcmp(buf,"stop\n")==0){					// 만약 stop을 입력받았다면 프로그램을 종료한다.
+			exit(0);					// 프로그램 종료
 		}
 			
 			
 	} 
-	close(fd);
+	close(fd);							// 사용이 끝난 fd를 close
 	return 0;
 }
 
